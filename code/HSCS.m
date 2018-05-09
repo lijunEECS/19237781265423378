@@ -9,7 +9,7 @@ fail_smp = [];
 fail_cnt = 0;
 sample_unit = 2000;
 threshold = 139.5;
-sub_threshold = 138.0;
+sub_threshold = 138;
 t_threshold=0.10;
 p_threshold=0.01;
 t=0;
@@ -44,7 +44,7 @@ while(1)
          else
             dr = sqrt(D)/10;
             find_flag = 1;
-            sample_unit = 20000;
+%         sample_unit = 20000;
             fprintf('R=%f, get into suspicious region.\n', R);
             R = R - dr;
          end
@@ -60,19 +60,17 @@ while(1)
             fprintf('R=%f, fail_cnt=%d.\n', R, fail_cnt);
             w=R*ones(length(fail_idx),1);
             fail_smp = [fail_smp; r_normalized_samples(fail_idx,:) w];
-            %         sample_unit = 10*sample_unit_o;
-            %         dr=sqrt(sqrt(D/2));
         end
-    end
+   end
     
-    if(t>t_threshold && fail_cnt>250)
+    if(t>t_threshold && fail_cnt>500)
         disp('Exit presampling...');
         break;
     end
     
-    if (t<t_threshold)
+%     if (t<t_threshold)
         R=R+dr;
-    end
+%     end
     iter = iter +1;
 end
 
@@ -83,7 +81,7 @@ save('presample_res.mat', 'fail_smp', 'sim_times','dr');
 % clear;
 % load('presample_res.mat');
 
-[C,idx, sim_times] = kmeans_main(fail_smp,dr,sim_times);
+[C,idx, sim_times] = kmeans_main(fail_smp,sim_times);
 
 save('cluster_res.mat','C','idx','sim_times','fail_smp');
 
@@ -92,17 +90,19 @@ save('cluster_res.mat','C','idx','sim_times','fail_smp');
 clear;
 load('cluster_res.mat');
 
-[MCpfail, MCfom, sample_n, new_smp, sim_times] = mis_main(fail_smp,C,idx, sim_times);
+new_smp_size = 500;
+[MCpfail, MCfom, sample_n, new_smp, sim_times] = mis_main(fail_smp,C,idx, new_smp_size, sim_times);
 file_name = [num2str(0), 'thMIS_res.mat'];
 save(file_name);
     
 stop_fom = 0.1;
 iter=1;
+
 while(MCfom(end)>stop_fom)
-    dr = (new_smp(end,end)-new_smp(1,end))/5;
-    [C, idx, sim_times] = kmeans_main(new_smp, dr, sim_times);
+    [C, idx, sim_times] = kmeans_main(new_smp, sim_times);
     fprintf('Accumulated simulation times = %d \n', sim_times);
-    [MCpfail, MCfom, sample_n, new_smp, sim_times] = mis_main(new_smp,C,idx, sim_times);
+    new_smp_size = new_smp_size + 200;
+    [MCpfail, MCfom, sample_n, new_smp, sim_times] = mis_main(new_smp,C,idx, new_smp_size, sim_times);
     file_name = [num2str(iter), 'thMIS_res.mat'];
     save(file_name);
     iter = iter+1;

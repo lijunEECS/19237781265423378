@@ -1,11 +1,11 @@
-function [C, idx, sim_times] = kmeans_main(fail_smp, dr, sim_times)
+function [C, idx, sim_times] = kmeans_main(fail_smp, sim_times)
 
 smp_num = size(fail_smp,1);
 D = size(fail_smp, 2) - 1;
 
-w_smp = sampleWeight(fail_smp, dr);
-
 R = fail_smp(:,end);
+
+w_smp = sampleWeight(fail_smp);
 
 fail_smp = bsxfun(@rdivide,fail_smp(:,1:end-1),R);
 
@@ -65,12 +65,10 @@ for i = 1:cluster_num
     samples_k = fail_smp(idx==i,:);  
     R_k = min(R(idx==i));    
     d_k = max(Cluster_norm(C_k, samples_k));
-    if(size(fail_smp,1) <= 5)
-        R_res = R_k;
-    else
-        [R_res, sim_num] = min_norm(R_k, C_k, d_k);
-        sim_times = sim_times + sim_num;
-    end
+    fprintf('cluster volume: %d, max distance = %f \n', size(samples_k,1), d_k);
+    
+    [R_res, sim_num] = min_norm(R_k, C_k, d_k);
+    sim_times = sim_times + sim_num;
     
     %%%test
     test1 = R_res*C(i,:);

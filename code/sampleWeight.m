@@ -1,4 +1,4 @@
-function w = sampleWeight(samples, R_min)
+function w = sampleWeight(samples)
 
 % data = samples(:,1:end-1);
 % [~,D] = size(data);
@@ -15,6 +15,8 @@ function w = sampleWeight(samples, R_min)
 % w = 1/sum(w)*w;
 
 R = samples(:,end);
+
+R_min = max((max(R) - min(R))/4, min(R)/40);
 
 w = exp(-(1/R_min)*R);
 

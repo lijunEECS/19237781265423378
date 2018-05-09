@@ -3,7 +3,7 @@ function [R_res, sim_num] = min_norm(R, C, d)
     R_max = R;
     R_min = 0;
     R_threshold = R/100;
-    batch_size = 1000;
+    batch_size = 100;
     D = length(C);
     sim_num = 0;
     R_res = R;
@@ -35,9 +35,9 @@ function [R_res, sim_num] = min_norm(R, C, d)
 
             dis = Cluster_norm(C, sample_try);
             idx = find(dis<d);
-            if(iter>100)
-                fprintf('d = %d. Only find %d samples! Try to increase try_size.\n', d, size(samples,1));
-                try_size = 100*batch_size;
+            if(iter>150)             
+                fprintf('d = %d. Only find %d samples! \n', d, size(samples,1));               
+                return;     
             end
             if(isempty(idx))
                 continue;
@@ -45,13 +45,16 @@ function [R_res, sim_num] = min_norm(R, C, d)
             batch_num = batch_num + length(idx);
             samples = [samples; sample_try(idx,:)];
         end
-        samples = samples(1:batch_size,:);
-        sim_num = sim_num + batch_num;
-        MCresults = isFailure(samples, threshold);
-        if(isempty(find(MCresults,1)))
-            R_min = R_tmp;
-        else
-            R_max = R_tmp;
+        if(~isempty(samples))
+            N = min(size(samples,1),batch_size);
+            samples = samples(1:N,:);
+            sim_num = sim_num + batch_num;
+            MCresults = isFailure(samples, threshold);
+            if(isempty(find(MCresults,1)))
+                R_min = R_tmp;
+            else
+                R_max = R_tmp;
+            end
         end
     end
     R_res = R_tmp;
