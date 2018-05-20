@@ -1,7 +1,6 @@
-% seed=20180429;
-%
-% rng(seed);
+function HSCS(seed)
 
+rng(seed);
 D=360;
 dr = sqrt(D)/3;
 R = dr;
@@ -91,18 +90,19 @@ clear;
 load('cluster_res.mat');
 
 new_smp_size = 500;
-[MCpfail, MCfom, sample_n, new_smp, sim_times] = mis_main(fail_smp,C,idx, new_smp_size, sim_times);
+[MCpfail, MCfom, td, sample_n, new_smp, sim_times] = mis_main(fail_smp,C,idx, new_smp_size, sim_times);
 file_name = [num2str(0), 'thMIS_res.mat'];
 save(file_name);
     
 stop_fom = 0.1;
 iter=1;
+td = [];
 
 while(MCfom(end)>stop_fom)
     [C, idx, sim_times] = kmeans_main(new_smp, sim_times);
     fprintf('Accumulated simulation times = %d \n', sim_times);
     new_smp_size = new_smp_size + 200;
-    [MCpfail, MCfom, sample_n, new_smp, sim_times] = mis_main(new_smp,C,idx, new_smp_size, sim_times);
+    [MCpfail, MCfom, td, sample_n, new_smp, sim_times] = mis_main(new_smp,C,idx, new_smp_size, sim_times);
     file_name = [num2str(iter), 'thMIS_res.mat'];
     save(file_name);
     iter = iter+1;
@@ -120,4 +120,4 @@ xlabel('number of samples');
 
 save('mixISres.mat');
 
-
+end

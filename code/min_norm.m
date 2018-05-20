@@ -37,7 +37,7 @@ function [R_res, sim_num] = min_norm(R, C, d)
             idx = find(dis<d);
             if(iter>150)             
                 fprintf('d = %d. Only find %d samples! \n', d, size(samples,1));               
-                return;     
+                break;     
             end
             if(isempty(idx))
                 continue;
@@ -55,6 +55,8 @@ function [R_res, sim_num] = min_norm(R, C, d)
             else
                 R_max = R_tmp;
             end
+        else
+            break;
         end
     end
     R_res = R_tmp;

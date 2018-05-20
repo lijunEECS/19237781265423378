@@ -1,4 +1,4 @@
-function [MCpfail, MCfom, sample_n, new_smp, sim_times] = mis_main(fail_smp, C, idx, new_smp_size, sim_times)
+function [MCpfail, MCfom, td, sample_n, new_smp, sim_times] = mis_main(fail_smp, C, idx, new_smp_size, sim_times)
 
 alpha = 10^(-3);
 
@@ -22,6 +22,7 @@ sample_unit = 1000;
 threshold = 139.5;
 new_smp = [];
 max_iter = 100;
+td = [];
 
 
 disp('**********************************************');
@@ -32,13 +33,19 @@ while(iter<max_iter)
     
     [samples, w_smp] = generateMISSamples(C, alpha, beta, sample_unit);
     
-    MCresults = isFailure(samples, threshold);
+    [MCresults,td_tmp] = isFailure(samples, threshold);
+    td_tmp = [td_tmp(MCresults) w_smp(MCresults)];
     MCerror_counter = nnz(MCresults) ;
     MCtotal_error_counter = MCtotal_error_counter + MCerror_counter;
     sample_n = [sample_n, sample_n(end)+sample_unit];
+    td = [td; td_tmp];
     
     error_idx = find(MCresults);
-    MCweight_sum = sum(w_smp(error_idx));
+    if(isempty(error_idx))
+        MCweight_sum = 0;
+    else
+        MCweight_sum = sum(w_smp(error_idx));
+    end
     MCtotal_weight_sum = MCtotal_weight_sum + MCweight_sum;
     Rs = sqrt(sum(samples.^2,2));
     Stmp = [samples(error_idx,:) Rs(error_idx)];
@@ -64,9 +71,9 @@ while(iter<max_iter)
         if(MCfom(end)<=stop_fom)
             break;
         end
-    end
-    if(MCfom(end)<0.25)
-        iter = 1;
+        if(MCfom(end)<0.20)
+            iter = 1;
+        end
     end
 end
 

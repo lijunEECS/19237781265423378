@@ -1,4 +1,4 @@
-function res = isFailure(data, threshold)
+function [res, td] = isFailure(data, threshold)
 
 hspice_path = '/w/apps3/Synopsys/HSPICE/vG-2012.06/hspice/bin/hspice ';
 getMeanSigma_cp22nmdemo;
@@ -106,7 +106,7 @@ end
 fclose(fid);
 fprintf('batch size: %d, td: max %f, min %f, med %f \n', sample_unit, max(MCresults), min(MCresults), median(MCresults));
 
+td = MCresults;
 res = MCresults>threshold;
-
 end
 
