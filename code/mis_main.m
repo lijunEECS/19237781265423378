@@ -11,6 +11,8 @@ for i =1:cluster_num
     beta(i) = sum(w_k)/w_sum;
 end
 
+beta = 1/sum(beta)*beta;
+
 MCpfail = [];
 MCfom = [];
 stop_fom = 0.1;
